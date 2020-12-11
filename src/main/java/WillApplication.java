@@ -12,14 +12,14 @@ public class WillApplication {
     public static void main(String[] args) throws IOException{
         Map<String, List<String>> headerFileds = new HashMap<String, List<String>>();
 
-        FileWriter log
+        FileWriter log;
 
         // HttpURLConnection的实现和加载原理
 
         // 0. 初始化（资源准备）
         // assert file does exists.
         try {
-            log = new FileWriter("./log/log.txt");
+            log = new FileWriter("./src/main/java/log/log.txt");
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -31,10 +31,13 @@ public class WillApplication {
         // 1. 下载资源
         HttpURLConnection connection = null;
         InputStream protoIn = null;
+        FileInputStream fileInputStream = null;
         try {
             // 1.1 配置并启动连接
-            URL url = new URL("https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid=252499515&pid=372697442&segment_index=1");
+            URL url = new URL("https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid=265498641&pid=713118359&segment_index=1");
             connection = (HttpURLConnection) url.openConnection();  // connection并未实际发生，除非调用connection.connect();
+            // 设置文件头
+            // 发起
             connection.connect();
             if (connection.getResponseCode() == -1) {
                 log.write("[ERROR]: connection is null");
@@ -47,6 +50,18 @@ public class WillApplication {
                 log.write("[ERROR]: Input stream obtaining failed!");
                 return ;
             }
+
+            File seg = new File("./src/main/resources/seg_online.so");
+            FileOutputStream segOut = new FileOutputStream(seg);
+            byte[] bytesBuffer = new byte[2048];
+            int readLen;
+            while ((readLen=protoIn.read(bytesBuffer)) != -1) {
+                segOut.write(bytesBuffer,0,readLen);
+            }
+            segOut.close();
+
+            fileInputStream = new FileInputStream(seg);
+
             if (protoIn.read() == -1) {
                 System.out.println("File tail reached!");
                 // TODO: 停止下载循环 to stop the download cycle
@@ -62,7 +77,10 @@ public class WillApplication {
         // 2. 解析二进制文件
         Bilidm.DmSegMobileReply bilidm = null;
         try {
-            bilidm  = Bilidm.DmSegMobileReply.parseFrom(protoIn);
+//            protoIn = new FileInputStream("./src/main/resources/seg.so");
+
+//            bilidm  = Bilidm.DmSegMobileReply.parseFrom(protoIn);
+            bilidm  = Bilidm.DmSegMobileReply.parseFrom(fileInputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,32 +103,48 @@ public class WillApplication {
             dbConnection = DriverManager.getConnection(url, user, password);
 
             // 3.2 存储数据
-            String sql = "select * from videodm_test";
+//            String sql = "select * from videodm_test";
+            String sql =
+                    "INSERT IGNORE INTO " +
+                    "videodm_test (id,progress,mode,fontsize,color,midHash,content,ctime,weight,pool,idStr) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
             prepareStatement = dbConnection.prepareStatement(sql);
-            // 设置参数
-//            prepareStatement.setLong(1, 1l);
-            // 执行查询
-            rs = prepareStatement.executeQuery();
-            // 处理结果集
-            while (rs.next()) {
-                System.out.println(rs.getString("id"));
-                System.out.println(rs.getString("progress"));
-                System.out.println(rs.getString("content"));
+            for (Bilidm.DanmakuElem dmElem:dmList) {
+                // 设置参数
+                prepareStatement.setLong(1, dmElem.getId());
+                prepareStatement.setInt(2, dmElem.getProgress());
+                prepareStatement.setInt(3, dmElem.getMode());
+                prepareStatement.setInt(4, dmElem.getFontsize());
+                prepareStatement.setInt(5, dmElem.getColor());
+                prepareStatement.setString(6, dmElem.getMidHash());
+                prepareStatement.setString(7, dmElem.getContent());
+                prepareStatement.setLong(8, dmElem.getCtime());
+                prepareStatement.setInt(9, dmElem.getWeight());
+                prepareStatement.setInt(10, dmElem.getPool());
+                prepareStatement.setString(11, dmElem.getIdStr());
+                // 执行更新
+                prepareStatement.executeUpdate();
+                // 处理结果？？
             }
+
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             // 3.3 释放资源
             // 关闭连接，释放资源
-            if (rs != null) {
-                rs.close();
-            }
-            if (prepareStatement != null) {
-                prepareStatement.close();
-            }
-            if (connection != null) {
-                dbConnection.close();
-            }
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (prepareStatement != null) {
+                    prepareStatement.close();
+                }
+                if (dbConnection != null) {
+                    dbConnection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
         }
     }
     }

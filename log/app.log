@@ -1,0 +1,21 @@
+22:16:01.228 [main] ERROR WillApplication - START.
+22:16:01.230 [main] INFO  WillApplication - test
+22:16:02.484 [main] INFO  Downloader - stream is empty!
+22:29:51.693 [main] INFO  WillApplication - START.
+22:29:52.931 [main] INFO  WillApplication - Protobuf file downloading done.
+22:29:52.968 [main] INFO  WillApplication - Protobuf parsing done.
+22:29:54.520 [main] INFO  DatabaseAccesser - Total num: 1322 Updated Num: 1
+22:29:54.520 [main] INFO  WillApplication - Danmu file storage done.
+22:29:54.520 [main] INFO  WillApplication - COMPLETED.
+22:30:02.422 [main] INFO  WillApplication - START.
+22:30:03.686 [main] INFO  WillApplication - Protobuf file downloading done.
+22:30:03.727 [main] INFO  WillApplication - Protobuf parsing done.
+22:30:05.267 [main] INFO  DatabaseAccesser - Total num: 1322 Updated Num: 0
+22:30:05.267 [main] INFO  WillApplication - Danmu file storage done.
+22:30:05.267 [main] INFO  WillApplication - COMPLETED.
+22:31:13.660 [main] INFO  WillApplication - START.
+22:31:14.855 [main] INFO  WillApplication - Protobuf file downloading done.
+22:31:14.890 [main] INFO  WillApplication - Protobuf parsing done.
+22:31:26.852 [main] INFO  DatabaseAccesser - Total num: 1322 Updated Num: 1322
+22:31:26.852 [main] INFO  WillApplication - Danmu file storage done.
+22:31:26.852 [main] INFO  WillApplication - COMPLETED.
